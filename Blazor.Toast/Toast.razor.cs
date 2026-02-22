@@ -31,10 +31,10 @@ public partial class Toast : IDisposable
         if (Settings.ShowProgressBar!.Value)
             _countdownTimer = new CountdownTimer(Settings.Timeout, Settings.ExtendedTimeout!.Value)
                 .OnTick(CalculateProgressAsync)
-                .OnElapsed(Close);
+                .OnElapsed(CloseByTimeout);
         else
             _countdownTimer = new CountdownTimer(Settings.Timeout, Settings.ExtendedTimeout!.Value)
-                .OnElapsed(Close);
+                .OnElapsed(CloseByTimeout);
 
         await _countdownTimer.StartAsync();
     }
@@ -44,7 +44,12 @@ public partial class Toast : IDisposable
     /// </summary>
     public void Close()
     {
-        ToastsContainer.RemoveToast(ToastId);
+        ToastsContainer.RemoveToast(ToastId, Configuration.ToastCloseReason.CloseButton);
+    }
+
+    private void CloseByTimeout()
+    {
+        ToastsContainer.RemoveToast(ToastId, Configuration.ToastCloseReason.Timeout);
     }
 
     private void TryPauseCountdown()
@@ -73,7 +78,15 @@ public partial class Toast : IDisposable
 
     private void ToastClick()
     {
-        Settings.OnClick?.Invoke();
+        try
+        {
+            Settings.OnClick?.Invoke();
+        }
+        finally
+        {
+            // Ensure clicking the toast body closes it and reports Click reason
+            ToastsContainer.RemoveToast(ToastId, Configuration.ToastCloseReason.Click);
+        }
     }
 
     private bool ShowIconDiv()

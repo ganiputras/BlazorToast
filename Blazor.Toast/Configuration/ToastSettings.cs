@@ -2,6 +2,20 @@
 
 public class ToastSettings
 {
+    /// <summary>
+    /// Creates a new instance of <see cref="ToastSettings"/> with explicit values.
+    /// </summary>
+    /// <param name="additionalClasses">Additional CSS classes applied to the toast element.</param>
+    /// <param name="iconType">Optional icon type to use for the toast.</param>
+    /// <param name="icon">Optional icon name (for FontAwesome/Material).</param>
+    /// <param name="showProgressBar">Whether to show the progress bar.</param>
+    /// <param name="showCloseButton">Whether to show the close button.</param>
+    /// <param name="onClick">Optional action invoked when the toast body is clicked.</param>
+    /// <param name="timeout">Timeout in seconds before auto-close.</param>
+    /// <param name="disableTimeout">When true, the toast will not auto-close.</param>
+    /// <param name="pauseProgressOnHover">When true, hovering pauses progress/timer.</param>
+    /// <param name="extendedTimeout">Extended timeout (seconds) after hover unpause.</param>
+    /// <param name="toastPosition">Optional per-toast position override.</param>
     public ToastSettings(
         string additionalClasses,
         IconType? iconType,
@@ -30,96 +44,65 @@ public class ToastSettings
         if (onClick is not null) AdditionalClasses += " blazor-toast-action";
     }
 
-#pragma warning disable CS8618
     internal ToastSettings()
     {
     }
-#pragma warning restore CS8618
+
     /// <summary>
-    ///     The <c>AdditionalClasses</c> property is used to specify additional CSS classes that will be applied to the toast
-    ///     component.
+    /// Additional CSS classes applied to the toast element.
     /// </summary>
     /// <remarks>
-    ///     By setting this property, you can customize the appearance of the toast notification and apply custom styles to it.
-    ///     Note that the value of the <c>AdditionalClasses</c> property should be a string containing one or more CSS class
-    ///     names separated by spaces.
+    /// Provide one or more CSS class names separated by spaces to customize toast styling.
     /// </remarks>
     public string AdditionalClasses { get; set; }
 
     /// <summary>
-    ///     The possible values for the <c>Icon</c> property are names of icons from the FontAwesome and Material icon
-    ///     libraries. By providing the name of the desired icon, the corresponding icon will be displayed on the notification.
+    /// Icon name (FontAwesome / Material) to use for the toast.
     /// </summary>
     public string? Icon { get; set; }
 
     /// <summary>
-    ///     The <c>IconType</c> property determines the type of icon that will be displayed on the toast notification. This
-    ///     property is an optional feature that can be used to provide users with additional visual cues about the
-    ///     notification.
+    /// Optional icon type selection for the toast.
     /// </summary>
     public IconType? IconType { get; set; }
 
     /// <summary>
-    ///     Enabling the <c>ShowProgressBar</c> property provides visual feedback on the remaining time for the toast
-    ///     notification based on the <c>Timeout</c> property.
+    /// When true, a progress bar is shown reflecting remaining timeout.
     /// </summary>
     public bool? ShowProgressBar { get; set; }
 
     /// <summary>
-    ///     When the <c>PauseProgressOnHover</c> property is enabled, the timeout period for the toast notification will be
-    ///     paused when the user hovers the mouse over the toast.
+    /// When true, hovering the toast will pause the progress/timer (if supported).
     /// </summary>
-    /// <remarks>
-    ///     This can be useful for providing users with more time to read the contents of the notification. By using the
-    ///     <c>PauseProgressOnHover</c> property in conjunction with the <c>ExtendedTimeout</c> property, you can create a
-    ///     toast notification that is more user-friendly and provides better visual feedback to the user.
-    /// </remarks>
     public bool? PauseProgressOnHover { get; set; }
 
     /// <summary>
-    ///     The ShowCloseButton property determines whether or not the close button is displayed on the toast notification.
+    /// When true, a close button is displayed on the toast.
     /// </summary>
     public bool? ShowCloseButton { get; set; }
 
     /// <summary>
-    ///     The <c>OnClick</c> property is an optional action that is triggered when the user clicks on the toast notification.
+    /// Optional callback executed when the toast body is clicked.
     /// </summary>
-    /// <remarks>
-    ///     This property allows you to define a custom action that will be executed when the user interacts with the
-    ///     notification, such as opening a new window or performing some other action.
-    /// </remarks>
     public Action? OnClick { get; set; }
 
     /// <summary>
-    ///     The <c>Timeout</c> property determines the amount of time, in seconds, that the toast notification will be
-    ///     displayed before it is automatically closed.
+    /// Timeout in seconds before the toast auto-closes. A value of 0 means "use global default".
     /// </summary>
-    /// <remarks>
-    ///     By setting this property, you can control the duration of the notification and ensure that it is visible to the
-    ///     user for an appropriate amount of time.
-    /// </remarks>
     public int Timeout { get; set; }
 
     /// <summary>
-    ///     When <c>PauseProgressOnHover</c> is enabled, the <c>ExtendedTimeout</c> property determines the amount of time, in
-    ///     seconds, that the toast notification will remain visible after the user moves the mouse away from it.
+    /// When set, number of seconds to wait after hover unpause before closing.
     /// </summary>
-    /// <remarks>
-    ///     Default value is <c>0</c>, meaning no extended timeout.
-    /// </remarks>
     public int? ExtendedTimeout { get; set; }
 
     /// <summary>
-    ///     Setting the <c>DisableTimeout</c> property to true will prevent the toast notification from automatically closing,
-    ///     ignoring <c>Timeout</c> and <c>ExtendedTimeout</c> properties. A close button will be shown to allow the user to
-    ///     dismiss the notification manually.
+    /// When true, prevents automatic closing (shows close button if enabled).
     /// </summary>
     public bool? DisableTimeout { get; set; }
 
     /// <summary>
-    ///     Setting this property will override the global toast position property and allows you to set a specific position
-    ///     for this toast notification. The position can be set to one of the predefined values in the <c>ToastPosition</c>
-    ///     enumeration.
+    /// Optional per-toast position override.
     /// </summary>
     public ToastPosition? Position { get; set; }
 

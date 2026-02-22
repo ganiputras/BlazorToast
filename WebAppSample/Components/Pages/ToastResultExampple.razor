@@ -1,0 +1,79 @@
+﻿@page "/toast-ToastResultExampple"
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Toast - Toast Result examples</PageTitle>
+
+<div class="col-md-6">
+    <h3>ToastResult (detailed) examples</h3>
+
+    <div class="d-grid gap-2 mb-3">
+        <button class="btn btn-info btn-block" @onclick="ShowInfoDetailed">Show Info (detailed)</button>
+        <button class="btn btn-success btn-block" @onclick="ShowSuccessDetailed">Show Success (detailed)</button>
+        <button class="btn btn-warning btn-block" @onclick="ShowWarningDetailed">Show Warning (detailed)</button>
+        <button class="btn btn-primary btn-block" @onclick="ShowComponentDetailed">Show Component (detailed)</button>
+        <button class="btn btn-outline-secondary btn-block" @onclick="ClearAll">Clear all</button>
+    </div>
+
+    <h4>Last detailed result</h4>
+    @if (_lastResult is null)
+    {
+        <div class="p-2 border rounded bg-light">No detailed result yet.</div>
+    }
+    else
+    {
+        <div class="p-2 border rounded bg-light">
+            <div><strong>ToastId:</strong> @_lastResult.ToastId</div>
+            <div><strong>Reason:</strong> @_lastResult.Reason</div>
+            <div><strong>ShownAt:</strong> @_lastResult.ShownAt.ToString("G")</div>
+            <div><strong>ClosedAt:</strong> @_lastResult.ClosedAt.ToString("G")</div>
+            <div><strong>Duration:</strong> @_lastResult.Duration.TotalSeconds.ToString("0.##") s</div>
+        </div>
+    }
+</div>
+
+@code {
+    private Blazor.Toast.Configuration.ToastResult? _lastResult;
+    private ToastParameters? _componentParameters;
+
+    protected override void OnInitialized()
+    {
+        _componentParameters = new ToastParameters();
+        _componentParameters.Add(nameof(WebAppSample.Components.Pages.MyToastComponent.Title), "Detailed component title");
+        _componentParameters.Add(nameof(WebAppSample.Components.Pages.MyToastComponent.ToastParam), "component param");
+    }
+
+    private async Task ShowInfoDetailed()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "Detailed info toast — returns ToastResult when closed.");
+        var result = await ToastService.ShowInfoDetailedAsync(msg, settings => { settings.Timeout = 4; settings.ShowProgressBar = true; });
+        _lastResult = result;
+    }
+
+    private async Task ShowSuccessDetailed()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "Detailed success toast — returns ToastResult when closed.");
+        var result = await ToastService.ShowSuccessDetailedAsync(msg, settings => { settings.Timeout = 6; settings.ShowProgressBar = true; });
+        _lastResult = result;
+    }
+
+    private async Task ShowWarningDetailed()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "Detailed warning toast — returns ToastResult when closed.");
+        var result = await ToastService.ShowWarningDetailedAsync(msg, settings => { settings.Timeout = 5; settings.ShowProgressBar = true; });
+        _lastResult = result;
+    }
+
+    private async Task ShowComponentDetailed()
+    {
+        var result = await ToastService.ShowToastDetailedAsync<MyToastComponent>(_componentParameters, settings => { settings.Timeout = 8; });
+        _lastResult = result;
+    }
+
+    private void ClearAll()
+    {
+        ToastService.ClearAll();
+        _lastResult = null;
+    }
+}

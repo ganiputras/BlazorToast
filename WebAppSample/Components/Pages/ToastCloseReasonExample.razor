@@ -1,0 +1,136 @@
+@page "/toast-ToastCloseReason"
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Toast - CloseReason examples</PageTitle>
+
+<div class="col-md-6">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h3>Close reason examples</h3>
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-block" @onclick="ShowTimeoutToast">Timeout</button>
+                <button class="btn btn-secondary btn-block" @onclick="ShowCloseButtonToast">Close button</button>
+                <button class="btn btn-info btn-block" @onclick="ShowClickToast">Click body</button>
+                <button class="btn btn-success btn-block" @onclick="ShowProgrammaticToast">Programmatic clear</button>
+                <button class="btn btn-warning btn-block" @onclick="ShowSuccessAwait">Success (await)</button>
+                <button class="btn btn-info btn-block" @onclick="ShowWarningAwait">Warning (await)</button>
+                <button class="btn btn-danger btn-block" @onclick="ShowErrorAwait">Error (await)</button>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <h3>Custom / Helpers</h3>
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-info btn-block" @onclick="ShowHtml">Info with HTML</button>
+                <button class="btn btn-primary btn-block" @onclick="ShowComponent">Show component toast</button>
+                <button class="btn btn-outline-secondary btn-block" @onclick="ClearAll">Clear all toasts</button>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h4>Last result</h4>
+            <div class="p-2 border rounded bg-light">@_lastResultMessage</div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <h4>Queued demo params</h4>
+            <div class="p-2">
+                <small>Component toast parameters used for component examples.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private string? _lastResultMessage;
+    private ToastParameters? _componentParameters;
+
+    protected override void OnInitialized()
+    {
+        _componentParameters = new ToastParameters();
+        _componentParameters.Add("Title", "Hello from ToastExample");
+        _componentParameters.Add("ToastParam", "Parameter value");
+    }
+
+    private async Task ShowSuccessAwait()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "This toast is awaitable. Click to close.");
+        var reason = await ToastService.ShowSuccessAsync(msg, settings => { settings.ShowProgressBar = true; });
+        _lastResultMessage = $"Toast closed: {reason}";
+    }
+
+    private async Task ShowErrorAwait()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "An error occurred.");
+        var reason = await ToastService.ShowErrorAsync(msg, settings => { settings.AdditionalClasses = "custom-error-class"; settings.ShowCloseButton = true; });
+        _lastResultMessage = $"Closed by: {reason}";
+    }
+
+    private async Task ShowWarningAwait()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "This is a warning (await). Click to close or wait timeout.");
+        var reason = await ToastService.ShowWarningAsync(msg, settings => { settings.Timeout = 6; settings.ShowProgressBar = true; });
+        _lastResultMessage = $"Closed by: {reason}";
+    }
+
+    private void ShowHtml()
+    {
+        RenderFragment msg = @<text>This is <strong>HTML</strong> content in a toast.</text>;
+        ToastService.ShowInfo(msg);
+    }
+
+    private async Task ShowComponent()
+    {
+        // Show a custom component as toast and await close reason
+        var reason = await ToastService.ShowToastAsync<MyToastComponent>(_componentParameters, settings => { settings.Timeout = 8; });
+        _lastResultMessage = $"Component toast closed: {reason}";
+    }
+
+    private void ClearAll()
+    {
+        ToastService.ClearAll();
+    }
+
+    // --- Close reason specific examples ---
+    private async Task ShowTimeoutToast()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "This toast will close by timeout (3s).");
+        var reason = await ToastService.ShowInfoAsync(msg, settings => { settings.Timeout = 3; settings.ShowProgressBar = true; });
+        _lastResultMessage = $"Closed by: {reason}";
+    }
+
+    private async Task ShowCloseButtonToast()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "Click the close (X) button to close me.");
+        // Disable timeout so the user must click the close button
+        var reason = await ToastService.ShowInfoAsync(msg, settings => { settings.DisableTimeout = true; settings.ShowCloseButton = true; });
+        _lastResultMessage = $"Closed by: {reason}";
+    }
+
+    private async Task ShowClickToast()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "Click the toast body to trigger Click close reason.");
+        var reason = await ToastService.ShowInfoAsync(msg, settings => { settings.Timeout = 0; settings.OnClick = () => { /* click will close as Click reason */ }; settings.ShowCloseButton = false; });
+        _lastResultMessage = $"Closed by: {reason}";
+    }
+
+    private async Task ShowProgrammaticToast()
+    {
+        RenderFragment msg = builder => builder.AddContent(0, "This toast will be cleared programmatically in 2 seconds.");
+        var task = ToastService.ShowInfoAsync(msg, settings => { settings.Timeout = 60; settings.ShowCloseButton = true; });
+
+        // Wait 2 seconds then clear programmatically
+        await Task.Delay(2000);
+        ToastService.ClearAll();
+        var reason = await task;
+        _lastResultMessage = $"Closed by: {reason}";
+    }
+}

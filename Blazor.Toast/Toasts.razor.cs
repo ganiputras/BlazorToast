@@ -7,7 +7,7 @@ namespace Blazor.Toast;
 
 public partial class Toasts
 {
-    [Inject] private IToastService ToastService { get; set; } = default!;
+    [Inject] private IToastServiceEvents ToastServiceEvents { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
     [Parameter] public IconType IconType { get; set; } = IconType.Default;
@@ -35,13 +35,17 @@ public partial class Toasts
 
     protected override void OnInitialized()
     {
-        ToastService.OnShow += ShowToast;
-        ToastService.OnShowComponent += ShowCustomToast;
-        ToastService.OnClearAll += ClearAll;
-        ToastService.OnClearToasts += ClearToasts;
-        ToastService.OnClearCustomToasts += ClearCustomToasts;
-        ToastService.OnClearQueue += ClearQueue;
-        ToastService.OnClearQueueToasts += ClearQueueToasts;
+        ToastServiceEvents.OnShow += ShowToast;
+        ToastServiceEvents.OnShowAsync += ShowToastAsync;
+        ToastServiceEvents.OnShowDetailedAsync += ShowToastDetailedAsync;
+        ToastServiceEvents.OnShowComponent += ShowCustomToast;
+        ToastServiceEvents.OnShowComponentAsync += ShowCustomToastAsync;
+        ToastServiceEvents.OnShowComponentDetailedAsync += ShowCustomToastDetailedAsync;
+        ToastServiceEvents.OnClearAll += ClearAll;
+        ToastServiceEvents.OnClearToasts += ClearToasts;
+        ToastServiceEvents.OnClearCustomToasts += ClearCustomToasts;
+        ToastServiceEvents.OnClearQueue += ClearQueue;
+        ToastServiceEvents.OnClearQueueToasts += ClearQueueToasts;
 
         if (RemoveToastsOnNavigation) NavigationManager.LocationChanged += ClearToasts;
 
@@ -51,6 +55,26 @@ public partial class Toasts
             && string.IsNullOrWhiteSpace(WarningIcon)
             && string.IsNullOrWhiteSpace(ErrorIcon))
             throw new ArgumentException("IconType is Custom but icon parameters are not set.");
+    }
+
+    private void ShowToastDetailedAsync(ToastLevel level, RenderFragment message, Action<ToastSettings>? toastSettings, TaskCompletionSource<ToastResult>? completionSource)
+    {
+        InvokeAsync(() =>
+        {
+            var settings = BuildToastSettings(level, toastSettings);
+            var toast = new ToastInstance(message, level, settings, null, completionSource);
+
+            if (ToastList.Count < MaxToastCount)
+            {
+                ToastList.Add(toast);
+
+                StateHasChanged();
+            }
+            else
+            {
+                ToastWaitingQueue.Enqueue(toast);
+            }
+        });
     }
 
     private ToastSettings BuildCustomToastSettings(Action<ToastSettings>? settings)
@@ -65,6 +89,30 @@ public partial class Toasts
         instanceToastSettings.ShowProgressBar ??= ShowProgressBar;
 
         return instanceToastSettings;
+    }
+
+    private void ShowCustomToastDetailedAsync(Type contentComponent, ToastParameters? parameters, Action<ToastSettings>? settings, TaskCompletionSource<ToastResult>? completionSource)
+    {
+        InvokeAsync(() =>
+        {
+            var childContent = new RenderFragment(builder =>
+            {
+                var i = 0;
+                builder.OpenComponent(i++, contentComponent);
+                if (parameters is not null)
+                    foreach (var parameter in parameters.Parameters)
+                        builder.AddAttribute(i++, parameter.Key, parameter.Value);
+
+                builder.CloseComponent();
+            });
+
+            var toastSettings = BuildCustomToastSettings(settings);
+            var toastInstance = new ToastInstance(childContent, toastSettings, null, completionSource);
+
+            ToastList.Add(toastInstance);
+
+            StateHasChanged();
+        });
     }
 
     private ToastSettings BuildToastSettings(ToastLevel level, Action<ToastSettings>? settings)
@@ -126,6 +174,26 @@ public partial class Toasts
         });
     }
 
+    private void ShowToastAsync(ToastLevel level, RenderFragment message, Action<ToastSettings>? toastSettings, TaskCompletionSource<ToastCloseReason>? completionSource)
+    {
+        InvokeAsync(() =>
+        {
+            var settings = BuildToastSettings(level, toastSettings);
+            var toast = new ToastInstance(message, level, settings, completionSource);
+
+            if (ToastList.Count < MaxToastCount)
+            {
+                ToastList.Add(toast);
+
+                StateHasChanged();
+            }
+            else
+            {
+                ToastWaitingQueue.Enqueue(toast);
+            }
+        });
+    }
+
     private void ShowCustomToast(Type contentComponent, ToastParameters? parameters, Action<ToastSettings>? settings)
     {
         InvokeAsync(() =>
@@ -150,6 +218,30 @@ public partial class Toasts
         });
     }
 
+    private void ShowCustomToastAsync(Type contentComponent, ToastParameters? parameters, Action<ToastSettings>? settings, TaskCompletionSource<ToastCloseReason>? completionSource)
+    {
+        InvokeAsync(() =>
+        {
+            var childContent = new RenderFragment(builder =>
+            {
+                var i = 0;
+                builder.OpenComponent(i++, contentComponent);
+                if (parameters is not null)
+                    foreach (var parameter in parameters.Parameters)
+                        builder.AddAttribute(i++, parameter.Key, parameter.Value);
+
+                builder.CloseComponent();
+            });
+
+            var toastSettings = BuildCustomToastSettings(settings);
+            var toastInstance = new ToastInstance(childContent, toastSettings, completionSource);
+
+            ToastList.Add(toastInstance);
+
+            StateHasChanged();
+        });
+    }
+
     private void ShowEnqueuedToast()
     {
         InvokeAsync(() =>
@@ -162,7 +254,7 @@ public partial class Toasts
         });
     }
 
-    public void RemoveToast(Guid toastId)
+    public void RemoveToast(Guid toastId, ToastCloseReason reason = ToastCloseReason.Unknown)
     {
         InvokeAsync(() =>
         {
@@ -171,6 +263,35 @@ public partial class Toasts
             if (toastInstance is not null)
             {
                 ToastList.Remove(toastInstance);
+                try
+                {
+                    toastInstance.CompletionSource?.TrySetResult(reason);
+                }
+                catch
+                {
+                    // ignore
+                }
+
+                try
+                {
+                    if (toastInstance.CompletionSourceResult is not null)
+                    {
+                        var result = new ToastResult
+                        {
+                            ToastId = toastInstance.Id,
+                            Reason = reason,
+                            ShownAt = toastInstance.TimeStamp,
+                            ClosedAt = DateTime.Now
+                        };
+
+                        toastInstance.CompletionSourceResult.TrySetResult(result);
+                    }
+                }
+                catch
+                {
+                    // ignore
+                }
+
                 StateHasChanged();
             }
 
@@ -182,10 +303,33 @@ public partial class Toasts
     {
         InvokeAsync(() =>
         {
-            ToastList.Clear();
-            StateHasChanged();
+            // Programmatically remove all visible toasts (report Programmatic close reason)
+            var ids = ToastList.Select(t => t.Id).ToList();
+            foreach (var id in ids)
+                RemoveToast(id, ToastCloseReason.Programmatic);
 
-            if (ToastWaitingQueue.Any()) ShowEnqueuedToast();
+            // Clear queued toasts and notify any awaiting callers as Programmatic
+            while (ToastWaitingQueue.Count > 0)
+            {
+                var queued = ToastWaitingQueue.Dequeue();
+                try { queued.CompletionSource?.TrySetResult(ToastCloseReason.Programmatic); } catch { }
+                try
+                {
+                    if (queued.CompletionSourceResult is not null)
+                    {
+                        queued.CompletionSourceResult.TrySetResult(new ToastResult
+                        {
+                            ToastId = queued.Id,
+                            Reason = ToastCloseReason.Programmatic,
+                            ShownAt = queued.TimeStamp,
+                            ClosedAt = DateTime.Now
+                        });
+                    }
+                }
+                catch { }
+            }
+
+            StateHasChanged();
         });
     }
 
@@ -193,7 +337,31 @@ public partial class Toasts
     {
         InvokeAsync(() =>
         {
-            ToastList.Clear();
+            var ids = ToastList.Select(t => t.Id).ToList();
+            foreach (var id in ids)
+                RemoveToast(id, ToastCloseReason.Programmatic);
+
+            // Clear queued toasts and notify awaiting callers
+            while (ToastWaitingQueue.Count > 0)
+            {
+                var queued = ToastWaitingQueue.Dequeue();
+                try { queued.CompletionSource?.TrySetResult(ToastCloseReason.Programmatic); } catch { }
+                try
+                {
+                    if (queued.CompletionSourceResult is not null)
+                    {
+                        queued.CompletionSourceResult.TrySetResult(new ToastResult
+                        {
+                            ToastId = queued.Id,
+                            Reason = ToastCloseReason.Programmatic,
+                            ShownAt = queued.TimeStamp,
+                            ClosedAt = DateTime.Now
+                        });
+                    }
+                }
+                catch { }
+            }
+
             StateHasChanged();
         });
     }
@@ -202,7 +370,33 @@ public partial class Toasts
     {
         InvokeAsync(() =>
         {
-            ToastList.RemoveAll(x => x.CustomComponent is null && x.Level == toastLevel);
+            var ids = ToastList.Where(x => x.CustomComponent is null && x.Level == toastLevel).Select(x => x.Id).ToList();
+            foreach (var id in ids) RemoveToast(id, ToastCloseReason.Programmatic);
+
+            // clear queued matching
+            var remainingQueue = new Queue<ToastInstance>(ToastWaitingQueue.Where(x => x.Level != toastLevel));
+            var removed = ToastWaitingQueue.Where(x => x.Level == toastLevel).ToList();
+            foreach (var q in removed)
+            {
+                try { q.CompletionSource?.TrySetResult(ToastCloseReason.Programmatic); } catch { }
+                try
+                {
+                    if (q.CompletionSourceResult is not null)
+                    {
+                        q.CompletionSourceResult.TrySetResult(new ToastResult
+                        {
+                            ToastId = q.Id,
+                            Reason = ToastCloseReason.Programmatic,
+                            ShownAt = q.TimeStamp,
+                            ClosedAt = DateTime.Now
+                        });
+                    }
+                }
+                catch { }
+            }
+
+            ToastWaitingQueue = remainingQueue;
+
             StateHasChanged();
         });
     }
@@ -211,7 +405,8 @@ public partial class Toasts
     {
         InvokeAsync(() =>
         {
-            ToastList.RemoveAll(x => x.CustomComponent is not null);
+            var ids = ToastList.Where(x => x.CustomComponent is not null).Select(x => x.Id).ToList();
+            foreach (var id in ids) RemoveToast(id, ToastCloseReason.Programmatic);
             StateHasChanged();
         });
     }
@@ -220,7 +415,26 @@ public partial class Toasts
     {
         InvokeAsync(() =>
         {
-            ToastWaitingQueue.Clear();
+            while (ToastWaitingQueue.Count > 0)
+            {
+                var queued = ToastWaitingQueue.Dequeue();
+                try { queued.CompletionSource?.TrySetResult(ToastCloseReason.Programmatic); } catch { }
+                try
+                {
+                    if (queued.CompletionSourceResult is not null)
+                    {
+                        queued.CompletionSourceResult.TrySetResult(new ToastResult
+                        {
+                            ToastId = queued.Id,
+                            Reason = ToastCloseReason.Programmatic,
+                            ShownAt = queued.TimeStamp,
+                            ClosedAt = DateTime.Now
+                        });
+                    }
+                }
+                catch { }
+            }
+
             StateHasChanged();
         });
     }
@@ -229,7 +443,28 @@ public partial class Toasts
     {
         InvokeAsync(() =>
         {
-            ToastWaitingQueue = new Queue<ToastInstance>(ToastWaitingQueue.Where(x => x.Level != toastLevel));
+            var remaining = new Queue<ToastInstance>(ToastWaitingQueue.Where(x => x.Level != toastLevel));
+            var removed = ToastWaitingQueue.Where(x => x.Level == toastLevel).ToList();
+            foreach (var q in removed)
+            {
+                try { q.CompletionSource?.TrySetResult(ToastCloseReason.Programmatic); } catch { }
+                try
+                {
+                    if (q.CompletionSourceResult is not null)
+                    {
+                        q.CompletionSourceResult.TrySetResult(new ToastResult
+                        {
+                            ToastId = q.Id,
+                            Reason = ToastCloseReason.Programmatic,
+                            ShownAt = q.TimeStamp,
+                            ClosedAt = DateTime.Now
+                        });
+                    }
+                }
+                catch { }
+            }
+
+            ToastWaitingQueue = remaining;
             StateHasChanged();
         });
     }

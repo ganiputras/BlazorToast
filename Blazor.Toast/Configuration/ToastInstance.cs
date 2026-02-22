@@ -5,17 +5,21 @@ namespace Blazor.Toast.Configuration;
 
 internal class ToastInstance
 {
-    public ToastInstance(RenderFragment message, ToastLevel level, ToastSettings toastSettings)
+    public ToastInstance(RenderFragment message, ToastLevel level, ToastSettings toastSettings, TaskCompletionSource<ToastCloseReason>? completionSource = null, TaskCompletionSource<ToastResult>? completionSourceResult = null)
     {
         Message = message;
         Level = level;
         ToastSettings = toastSettings;
+        CompletionSource = completionSource;
+        CompletionSourceResult = completionSourceResult;
     }
 
-    public ToastInstance(RenderFragment customComponent, ToastSettings settings)
+    public ToastInstance(RenderFragment customComponent, ToastSettings settings, TaskCompletionSource<ToastCloseReason>? completionSource = null, TaskCompletionSource<ToastResult>? completionSourceResult = null)
     {
         CustomComponent = customComponent;
         ToastSettings = settings;
+        CompletionSource = completionSource;
+        CompletionSourceResult = completionSourceResult;
     }
 
     public Guid Id { get; } = Guid.NewGuid();
@@ -24,4 +28,6 @@ internal class ToastInstance
     public ToastLevel Level { get; }
     public ToastSettings ToastSettings { get; }
     public RenderFragment? CustomComponent { get; }
+    public TaskCompletionSource<ToastCloseReason>? CompletionSource { get; }
+    public TaskCompletionSource<ToastResult>? CompletionSourceResult { get; }
 }

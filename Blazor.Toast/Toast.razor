@@ -69,6 +69,16 @@ else
 
         <p class="blazor-toast-message">@Message</p>
 
+        @* Small contextual hint to help users understand how to close or interact with the toast *@
+        @if (Settings.OnClick is not null && !(Settings.ShowCloseButton ?? false))
+        {
+            <div class="blazor-toast-hint">Click to perform action</div>
+        }
+        else if ((Settings.DisableTimeout ?? false) && (Settings.ShowCloseButton ?? false))
+        {
+            <div class="blazor-toast-hint">Click the close button to dismiss</div>
+        }
+
         @if (Settings.DisableTimeout!.Value || Settings.ShowCloseButton!.Value)
         {
             <button type="button" class="blazor-toast-close" @onclick=@Close>

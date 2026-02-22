@@ -4,7 +4,8 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<!--<NoWarn>$(NoWarn);1591;1573;1572;1570;1587;1584</NoWarn>-->
 		<!-- NuGet display fields -->
 		<PackageProjectUrl>https://github.com/ganiputras/BlazorToast</PackageProjectUrl>
 		<PackageReleaseNotes>Initial release</PackageReleaseNotes>
@@ -16,8 +17,8 @@
 		<Version>1.0.1</Version>
 		<Authors>ganiputras</Authors>
 		<Company>ganiputras</Company>
-		<Description>A lightweight toast notification library for Blazor built for .NET 10 and modern Razor Components.</Description>
-		<PackageTags>blazor;toast;notifications;net10</PackageTags>
+		<Description>A modern, lightweight toast notification library for Blazor (.NET 10) targeting Razor Components. Supports async results, component-based toasts, queue management, and flexible configuration.</Description>
+		<PackageTags>blazor toast notification ui razor-components aspnetcore webassembly server net10</PackageTags>
 
 		<RepositoryUrl>https://github.com/ganiputras/BlazorToast</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
