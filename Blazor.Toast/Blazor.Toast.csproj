@@ -14,7 +14,7 @@
 		<!-- NuGet metadata -->
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Blazor.Toast</PackageId>
-		<Version>1.0.1</Version>
+		<Version>1.0.2</Version>
 		<Authors>ganiputras</Authors>
 		<Company>ganiputras</Company>
 		<Description>A modern, lightweight toast notification library for Blazor (.NET 10) targeting Razor Components. Supports async results, component-based toasts, queue management, and flexible configuration.</Description>
