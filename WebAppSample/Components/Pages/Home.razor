@@ -6,32 +6,59 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Blazored Toasts</h1>
-<div>
-    <button class="btn btn-info" @onclick="@(() => ToastService.ShowInfo("I'm an INFO message"))">Info Toast</button>
-    <button class="btn btn-success" @onclick="@(() => ToastService.ShowSuccess("I'm a SUCCESS message with a custom heading"))">Success Toast</button>
-    <button class="btn btn-warning" @onclick="@(() => ToastService.ShowWarning("I'm a WARNING message"))">Warning Toast</button>
-    <button class="btn btn-danger" @onclick="@(() => ToastService.ShowError("I'm an ERROR message"))">Error Toast</button>
-    <button class="btn btn-info" @onclick="@OnShowHtml">Info Toast with HTML</button>
-    <button class="btn btn-info" @onclick="@(() => ToastService.ShowInfo("Click to refresh the page", options => options.OnClick = () => NavigationManager.NavigateTo("/", true)))">
-        Info Toast with custom action on click
-    </button>
+<div class="col-md-6">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h3>Toasts</h3>
+            <div class="d-grid gap-2">
+                <button class="btn btn-info btn-block" @onclick="ShowInfoToast">Info Toast</button>
+                <button class="btn btn-success btn-block" @onclick="ShowSuccessToast">Success Toast</button>
+                <button class="btn btn-warning btn-block" @onclick="ShowWarningToast">Warning Toast</button>
+                <button class="btn btn-danger btn-block" @onclick="ShowErrorToast">Error Toast</button>
+                <button class="btn btn-outline-info btn-block" @onclick="OnShowHtml">Info Toast with HTML</button>
+                <button class="btn btn-outline-secondary btn-block" @onclick="ShowInfoWithAction">Info Toast with action</button>
+                <div class="d-flex gap-2 mt-2">
+                    <button class="btn btn-info flex-fill" @onclick="ShowPauseInfo">Pause on hover</button>
+                    <button class="btn btn-success flex-fill" @onclick="ShowPauseSuccess">Pause + extended</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <h3>Custom Toasts</h3>
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-block" @onclick="ShowCustomToast">Custom Toast</button>
+                <button class="btn btn-secondary btn-block" @onclick="ShowCustomToastWithParams">Custom Toast with parameters</button>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <h4>Remove Toasts</h4>
+            <div class="d-flex flex-column gap-2">
+                <button class="btn btn-primary" @onclick="ClearAll">Clear All Toasts</button>
+                <button class="btn btn-warning" @onclick="ClearWarnings">Clear Warning Toasts</button>
+                <button class="btn btn-info" @onclick="ClearInfos">Clear Info Toasts</button>
+                <button class="btn btn-secondary" @onclick="ClearCustom">Clear Custom Toasts</button>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <h4>Remove queued Toasts</h4>
+            <div class="d-flex flex-column gap-2">
+                <button class="btn btn-primary" @onclick="ClearQueue">Clear all queued Toasts</button>
+                <button class="btn btn-warning" @onclick="ClearQueueWarnings">Clear queued Warning Toasts</button>
+                <button class="btn btn-info" @onclick="ClearQueueInfos">Clear queued Info Toasts</button>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="mt-2">
-    <button class="btn btn-info" @onclick="@(() => ToastService.ShowInfo("When you hover over me, I will pause the timeout progress and resume it once you move away", settings => { settings.Timeout = 15; settings.PauseProgressOnHover = true; }))">Pause progress on hover</button>
-    <button class="btn btn-success" @onclick="@(() => ToastService.ShowSuccess("When you hover over me, I will stop the timeout progress and close after an extended timeout of 1 second", settings => { settings.Timeout = 15; settings.PauseProgressOnHover = true; settings.ExtendedTimeout = 1; }))">Pause progress on hover with extended timeout</button>
-</div>
-<hr />
 
 
-<h1>Blazored Toasts - Custom Component</h1>
-
-<button class="btn btn-primary" @onclick="@(() => ToastService.ShowToast<MyToastComponent>(settings => { settings.Timeout = 5; settings.ShowProgressBar = false; }))">Custom Toast</button>
-<button class="btn btn-secondary" @onclick="@(() => ToastService.ShowToast<MyToastComponent>(_toastParameters, settings => { settings.Timeout = 5; settings.ShowProgressBar = false; }))">Custom Toast with parameters</button>
-<hr />
-
-
-<h1>Blazored Toasts - Remove Toasts</h1>
+<h1> Toasts - Remove Toasts</h1>
 
 <button class="btn btn-primary" @onclick="ClearAll">Clear All Toasts</button>
 <button class="btn btn-warning" @onclick="ClearWarnings">Clear Warning Toasts</button>
@@ -39,7 +66,7 @@
 <button class="btn btn-secondary" @onclick="ClearCustom">Clear Custom Toasts</button>
 <hr />
 
-<h1>Blazored Toasts - Remove queued Toasts</h1>
+<h1> Toasts - Remove queued Toasts</h1>
 
 <button class="btn btn-primary" @onclick="ClearQueue">Clear all queued Toasts</button>
 <button class="btn btn-warning" @onclick="ClearQueueWarnings">Clear queued Warning Toasts</button>
@@ -62,6 +89,33 @@
         RenderFragment message = @<text>I'm an <em>INFO</em> message with some <strong>bold</strong> text</text>;
         ToastService.ShowToast(ToastLevel.Info, message);
     }
+
+    private void ShowInfoToast()
+        => ToastService.ShowInfo("I'm an INFO message");
+
+    private void ShowSuccessToast()
+        => ToastService.ShowSuccess("I'm a SUCCESS message with a custom heading");
+
+    private void ShowWarningToast()
+        => ToastService.ShowWarning("I'm a WARNING message");
+
+    private void ShowErrorToast()
+        => ToastService.ShowError("I'm an ERROR message");
+
+    private void ShowInfoWithAction()
+        => ToastService.ShowInfo("Click to refresh the page", options => options.OnClick = () => NavigationManager.NavigateTo("/", true));
+
+    private void ShowPauseInfo()
+        => ToastService.ShowInfo("When you hover over me, I will pause the timeout progress and resume it once you move away", settings => { settings.Timeout = 15; settings.PauseProgressOnHover = true; });
+
+    private void ShowPauseSuccess()
+        => ToastService.ShowSuccess("When you hover over me, I will stop the timeout progress and close after an extended timeout of 1 second", settings => { settings.Timeout = 15; settings.PauseProgressOnHover = true; settings.ExtendedTimeout = 1; });
+
+    private void ShowCustomToast()
+        => ToastService.ShowToast<MyToastComponent>(settings => { settings.Timeout = 5; settings.ShowProgressBar = false; });
+
+    private void ShowCustomToastWithParams()
+        => ToastService.ShowToast<MyToastComponent>(_toastParameters, settings => { settings.Timeout = 5; settings.ShowProgressBar = false; });
 
     private void ClearAll()
         => ToastService.ClearAll();

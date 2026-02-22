@@ -1,22 +1,51 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
 
+		<!-- NuGet metadata -->
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>Blazor.Toast</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>ganiputras</Authors>
+		<Company>ganiputras</Company>
+		<Description>Toast notification components for Blazor (WebAssembly and Server).</Description>
+		<PackageTags>blazor;toast;notifications;net10</PackageTags>
 
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
+		<RepositoryUrl>https://github.com/ganiputras/BlazorToast</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.3" />
-  </ItemGroup>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageIcon>logo.png</PackageIcon>
+
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<IncludeSource>true</IncludeSource>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.3" />
+	</ItemGroup>
+
+	<!-- Static web assets -->
+	<ItemGroup>
+		<Content Include="wwwroot\**\*" Pack="true" PackagePath="wwwroot\" />
+	</ItemGroup>
+
+	<!-- Include package files from /package -->
+	<ItemGroup>
+		<None Include="package\readme.md" Pack="true" PackagePath="\" />
+		<None Include="package\license.txt" Pack="true" PackagePath="\" />
+		<None Include="package\logo.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 </Project>
