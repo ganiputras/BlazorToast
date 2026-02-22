@@ -10,7 +10,7 @@ public partial class Toasts
     [Inject] private IToastService ToastService { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
-    [Parameter] public IconType IconType { get; set; } = IconType.Blazored;
+    [Parameter] public IconType IconType { get; set; } = IconType.Default;
     [Parameter] public string? InfoClass { get; set; }
     [Parameter] public string? InfoIcon { get; set; }
     [Parameter] public string? SuccessClass { get; set; }
@@ -74,12 +74,12 @@ public partial class Toasts
 
         return level switch
         {
-            ToastLevel.Error => BuildToastSettings(toastInstanceSettings, "blazored-toast-error", ErrorIcon,
+            ToastLevel.Error => BuildToastSettings(toastInstanceSettings, "blazor-toast-error", ErrorIcon,
                 ErrorClass),
-            ToastLevel.Info => BuildToastSettings(toastInstanceSettings, "blazored-toast-info", InfoIcon, InfoClass),
-            ToastLevel.Success => BuildToastSettings(toastInstanceSettings, "blazored-toast-success", SuccessIcon,
+            ToastLevel.Info => BuildToastSettings(toastInstanceSettings, "blazor-toast-info", InfoIcon, InfoClass),
+            ToastLevel.Success => BuildToastSettings(toastInstanceSettings, "blazor-toast-success", SuccessIcon,
                 SuccessClass),
-            ToastLevel.Warning => BuildToastSettings(toastInstanceSettings, "blazored-toast-warning", WarningIcon,
+            ToastLevel.Warning => BuildToastSettings(toastInstanceSettings, "blazor-toast-warning", WarningIcon,
                 WarningClass),
             _ => throw new ArgumentOutOfRangeException(nameof(level))
         };

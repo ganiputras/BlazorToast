@@ -81,7 +81,7 @@ public partial class Toast : IDisposable
         return Settings.IconType switch
         {
             IconType.None => false,
-            IconType.Blazored => true,
+            IconType.Default => true,
             IconType.FontAwesome => !string.IsNullOrWhiteSpace(Settings.Icon),
             IconType.Material => !string.IsNullOrWhiteSpace(Settings.Icon),
             _ => false

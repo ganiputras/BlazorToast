@@ -1,4 +1,4 @@
-﻿.blazored-toast-container {
+﻿.blazor-toast-container {
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -37,7 +37,7 @@
     transform: translate(-50%, 0%);
 }
 
-.blazored-toast {
+.blazor-toast {
     width: 30rem;
     border-radius: .25rem;
 }

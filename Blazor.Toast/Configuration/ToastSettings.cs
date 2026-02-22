@@ -27,7 +27,7 @@ public class ToastSettings
         ExtendedTimeout = extendedTimeout;
         Position = toastPosition;
 
-        if (onClick is not null) AdditionalClasses += " blazored-toast-action";
+        if (onClick is not null) AdditionalClasses += " blazor-toast-action";
     }
 
 #pragma warning disable CS8618

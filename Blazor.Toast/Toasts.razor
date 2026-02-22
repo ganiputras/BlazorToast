@@ -2,7 +2,7 @@
 {
     @foreach (var positionGroupedToasts in ToastList.GroupBy(x => x.ToastSettings.PositionClass))
     {
-        <div class="blazored-toast-container @positionGroupedToasts.Key" @key="positionGroupedToasts.Key">
+        <div class="blazor-toast-container @positionGroupedToasts.Key" @key="positionGroupedToasts.Key">
             <CascadingValue Value=this IsFixed="true">
                 @foreach (var toast in positionGroupedToasts!.OrderBy(x => x.TimeStamp))
                 {

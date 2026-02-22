@@ -1,4 +1,6 @@
-﻿<div>
+﻿@*
+//This is a sample of how to customize the Toasts component in the footer of the application. You can adjust the properties of the Toasts component to fit your needs, such as changing the position, timeout, icons, and more. The CloseButtonContent allows you to customize the appearance of the close button for each toast notification.    
+<div>
     <Toasts Position="ToastPosition.BottomRight"
             Timeout="10"
             IconType="IconType.Material"
@@ -6,6 +8,26 @@
             InfoIcon="school"
             SuccessIcon="done_outline"
             WarningIcon="warning"
+            ShowProgressBar="@true"
+            ShowCloseButton="@true"
+            MaxToastCount="3">
+        <CloseButtonContent>
+            <div>
+                <span class="myCloseButtonStyleClass">&times;</span>
+            </div>
+        </CloseButtonContent>
+    </Toasts>
+</div>
+ *@
+
+<div>
+    <Toasts Position="ToastPosition.BottomRight"
+            Timeout="5"
+            IconType="IconType.Default"
+            ErrorIcon="info"
+            InfoIcon="info"
+            SuccessIcon="info"
+            WarningIcon="info"
             ShowProgressBar="@true"
             ShowCloseButton="@true"
             MaxToastCount="3">

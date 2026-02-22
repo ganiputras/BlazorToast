@@ -1,4 +1,4 @@
-﻿.blazored-toast {
+﻿.blazor-toast {
     display: flex;
     position: relative;
     flex-direction: row;
@@ -13,45 +13,45 @@
     border-top: 6px solid #fff;
 }
 
-.blazored-toast-component {
+.blazor-toast-component {
     display: initial;
     padding: 0 0 0 0;
     border-top: none;
 }
 
-.blazored-toast-info {
+.blazor-toast-info {
     border-top: 6px solid #2563eb;
 }
 
-.blazored-toast-info .blazored-toast-icon {
+.blazor-toast-info .blazor-toast-icon {
     color: #2563eb;
 }
 
-.blazored-toast-success {
+.blazor-toast-success {
     border-top: 6px solid #16a34a;
 }
 
-.blazored-toast-success .blazored-toast-icon {
+.blazor-toast-success .blazor-toast-icon {
     color: #16a34a;
 }
 
-.blazored-toast-warning {
+.blazor-toast-warning {
     border-top: 6px solid #eab308;
 }
 
-.blazored-toast-warning .blazored-toast-icon {
+.blazor-toast-warning .blazor-toast-icon {
     color: #eab308;
 }
 
-.blazored-toast-error {
+.blazor-toast-error {
     border-top: 6px solid #dc2626;
 }
 
-.blazored-toast-error .blazored-toast-icon {
+.blazor-toast-error .blazor-toast-icon {
     color: #dc2626;
 }
 
-.blazored-toast-icon {
+.blazor-toast-icon {
     display: flex;
     flex-direction: column;
     justify-content: start;
@@ -59,7 +59,7 @@
     font-size: 1.5rem;
 }
 
-.blazored-toast .blazored-toast-message {
+.blazor-toast .blazor-toast-message {
     flex-grow: 1;
     margin-bottom: 0;
     font-weight: 500;
@@ -73,7 +73,7 @@
     hyphens: auto;
 }
 
-.blazored-toast .blazored-toast-close {
+.blazor-toast .blazor-toast-close {
     display: flex;
     flex-direction: column;
     justify-content: start;
@@ -85,11 +85,11 @@
     font-size: 0.9rem;
 }
 
-.blazored-toast .blazored-toast-close:hover {
+.blazor-toast .blazor-toast-close:hover {
     color: inherit;
 }
 
-.blazored-toast .blazored-toast-progressbar {
+.blazor-toast .blazor-toast-progressbar {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -99,7 +99,7 @@
     border-bottom-right-radius: .375rem;
 }
 
-.blazored-toast .blazored-toast-progressbar > span {
+.blazor-toast .blazor-toast-progressbar > span {
     position: absolute;
     filter: brightness(75%);
     height: 6px;
@@ -108,7 +108,7 @@
     transition: all .1s linear;
 }
 
-.blazored-toast-action {
+.blazor-toast-action {
     cursor: pointer;
 }
 
