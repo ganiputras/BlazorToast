@@ -1,17 +1,22 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 
+		<!-- NuGet display fields -->
+		<PackageProjectUrl>https://github.com/ganiputras/BlazorToast</PackageProjectUrl>
+		<PackageReleaseNotes>Initial release</PackageReleaseNotes>
+		<PackageCopyright>© 2019 Blazored; Modifications © 2026 Gani Putras</PackageCopyright>
+
 		<!-- NuGet metadata -->
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Blazor.Toast</PackageId>
-		<Version>1.0.0</Version>
+		<Version>1.0.1</Version>
 		<Authors>ganiputras</Authors>
 		<Company>ganiputras</Company>
-		<Description>Toast notification components for Blazor (WebAssembly and Server).</Description>
+		<Description>A lightweight toast notification library for Blazor built for .NET 10 and modern Razor Components.</Description>
 		<PackageTags>blazor;toast;notifications;net10</PackageTags>
 
 		<RepositoryUrl>https://github.com/ganiputras/BlazorToast</RepositoryUrl>
@@ -19,13 +24,15 @@
 
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>logo.png</PackageIcon>
 
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<IncludeSource>true</IncludeSource>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -40,12 +47,10 @@
 	<ItemGroup>
 		<Content Include="wwwroot\**\*" Pack="true" PackagePath="wwwroot\" />
 	</ItemGroup>
-
-	<!-- Include package files from /package -->
 	<ItemGroup>
-		<None Include="package\readme.md" Pack="true" PackagePath="\" />
-		<None Include="package\license.txt" Pack="true" PackagePath="\" />
-		<None Include="package\logo.png" Pack="true" PackagePath="\" />
+		<None Update="logo.png" Pack="true" PackagePath="\" />
+		<None Update="LICENSE.txt" Pack="true" PackagePath="\" />
+		<None Update="README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
