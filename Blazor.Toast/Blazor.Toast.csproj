@@ -8,7 +8,7 @@
 		<!--<NoWarn>$(NoWarn);1591;1573;1572;1570;1587;1584</NoWarn>-->
 		<!-- NuGet display fields -->
 		<PackageProjectUrl>https://github.com/ganiputras/BlazorToast</PackageProjectUrl>
-		<PackageReleaseNotes>Initial release</PackageReleaseNotes>
+		<PackageReleaseNotes>MAJOR.MINOR.PATCH</PackageReleaseNotes>
 		<PackageCopyright>© 2019 Blazored; Modifications © 2026 Gani Putras</PackageCopyright>
 
 		<!-- NuGet metadata -->
