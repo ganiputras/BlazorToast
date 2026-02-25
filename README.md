@@ -3,7 +3,7 @@
 A lightweight toast notification library for Blazor, built for .NET 10 and modern Razor Components.
 
 > Independent fork — original project: https://github.com/Blazored/Toast (MIT). This fork adapts the library for .NET 10 and provides a streamlined API.
-
+![Legacy Example](legacy-example.jpg)
 ---
 
 ## Quick summary
