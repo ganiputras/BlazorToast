@@ -53,5 +53,8 @@
 		<None Update="LICENSE.txt" Pack="true" PackagePath="\" />
 		<None Update="README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="images\" />
+	</ItemGroup>
 
 </Project>

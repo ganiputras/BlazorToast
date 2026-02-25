@@ -1,55 +1,63 @@
 # Blazor.Toast
 
-A lightweight toast notification library for Blazor, built for .NET 10 and modern Razor Components.
+A lightweight toast notification library for Blazor (Razor Components), updated for .NET 10.
 
-> Independent fork — original project: https://github.com/Blazored/Toast (MIT). This fork adapts the library for .NET 10 and provides a streamlined API.
+This repository provides a small, RenderFragment-first API surface for showing toast notifications in Blazor Server and Blazor WebAssembly apps. It is an independent fork inspired by the original Blazored.Toast project.
 
----
+Status: functional for .NET 10 apps. See `WebAppSample` for working examples.
+![Legacy Example](legacy-example.jpg)
+## Key features
 
-## Quick summary
+- RenderFragment-first API (preferred): pass markup or components as toast content
+- Component-based toasts (render a Blazor component inside a toast)
+- Awaitable APIs that return a simple close reason or a detailed result object
+- Progress bar, close button, custom icons, position and timeout configuration
+- Queueing and programmatic clearing of toasts
 
-- Lightweight toast library for Blazor apps
-- Minimal, consistent public API (RenderFragment-first)
-- Compatible with .NET 10 Razor Components
-- Supports icons, progress bar, close button, component-based toasts, and awaitable results
+## Requirements
 
----
+- .NET 10 SDK
+- Blazor Server or Blazor WebAssembly (Razor Components)
 
 ## Installation
 
-Add the NuGet package (when published) or reference the project directly:
+1) When distributed as a NuGet package:
 
 ```bash
 dotnet add package Blazor.Toast
 ```
 
-Or add a project reference to your solution.
+2) Or add a project reference to `Blazor.Toast` in your solution.
 
----
+## Register the service
 
-## Service registration
+In `Program.cs` register the toast service. Examples below show both server and generic host setup.
 
-Register the toast service in DI in your `Program.cs` (Server or WASM hosting as appropriate):
+Blazor Server (interactive server components):
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents(); // for interactive server render mode
+    .AddInteractiveServerComponents();
 
 builder.Services.AddBlazorToast();
 
 var app = builder.Build();
-// ... map components and run
+// map components/endpoints and run
 ```
 
-The extension `AddBlazorToast()` registers the concrete `ToastService` as a singleton and exposes `IToastService` (public API) and the internal `IToastServiceEvents` used by the rendering component.
+Blazor WebAssembly (Client) — typical pattern: add service in the host project DI container:
 
----
+```csharp
+builder.Services.AddBlazorToast();
+```
 
-## Usage
+The `AddBlazorToast()` extension registers `ToastService` as a singleton and exposes the public `IToastService`.
 
-1) Add helpful usings to `_Imports.razor`:
+## Add imports
+
+Add these to your `_Imports.razor` for convenient usage:
 
 ```razor
 @using Blazor.Toast
@@ -57,18 +65,44 @@ The extension `AddBlazorToast()` registers the concrete `ToastService` as a sing
 @using Blazor.Toast.Configuration
 ```
 
-2) Place the `<Toasts>` component somewhere in your layout (must be rendered in an interactive render mode):
+## Render the toast container
+
+Place the `<Toasts>` component in your main layout or a root component that is rendered in an interactive render mode (Server: add `@rendermode InteractiveServer` where required).
+
+Basic example:
 
 ```razor
 @rendermode InteractiveServer
-<Toasts Position="ToastPosition.TopRight" Timeout="8" ShowProgressBar="true" />
+<Toasts Position="ToastPosition.BottomRight"
+            Timeout="5"
+            IconType="IconType.Default"
+            ErrorIcon="info"
+            InfoIcon="info"
+            SuccessIcon="info"
+            WarningIcon="info"
+            ShowProgressBar="@true"
+            ShowCloseButton="@true"
+            MaxToastCount="3">
+        <CloseButtonContent>
+            <div>
+                <span class="myCloseButtonStyleClass">&times;</span>
+            </div>
+        </CloseButtonContent>
+    </Toasts>
 ```
 
-If you prefer, render a small child component that contains `<Toasts>` with an explicit `@rendermode` attribute.
+Common parameters:
 
-3) Show a toast from any component by injecting `IToastService`:
+- `Position` — `ToastPosition` (TopRight, BottomRight, TopLeft, BottomLeft, TopCenter, BottomCenter)
+- `Timeout` — seconds (default timeout for toasts)
+- `ShowProgressBar` — true/false
+- `ShowCloseButton` — true/false
+- `MaxToastCount` — maximum visible toasts before queueing
+- `IconType` and per-level icons/classes for customizing visuals
 
-RenderFragment-based (preferred):
+## Show a toast (RenderFragment-first)
+
+Inject `IToastService` in any component or page and call the preferred RenderFragment APIs:
 
 ```razor
 @inject IToastService ToastService
@@ -78,92 +112,75 @@ RenderFragment-based (preferred):
     {
         ToastService.ShowSuccess(builder => builder.AddContent(0, "Saved"));
     }
+
+    async Task Confirm()
+    {
+        var reason = await ToastService.ShowInfoAsync(builder => builder.AddContent(0, "Confirm action?"));
+        if (reason == ToastCloseReason.Click) { /* handle click */ }
+    }
 }
 ```
 
-String convenience overloads are provided as extension methods so older code that passes a `string` still works:
+String convenience overloads are available (extensions wrap the string into a `RenderFragment`):
 
 ```csharp
-ToastService.ShowSuccess("Saved"); // uses extension to wrap as RenderFragment
+ToastService.ShowSuccess("Saved");
 ```
 
-Quick comparison — fire-and-forget vs await simple vs await detailed:
+## Component-based toasts
+
+Render a custom component inside a toast and optionally await a detailed result:
 
 ```csharp
-// 1) Fire-and-forget: show and continue immediately
-ToastService.ShowInfo(builder => builder.AddContent(0, "Saved successfully"));
-
-// 2) Await simple close reason (enum)
-var reason = await ToastService.ShowInfoAsync(builder => builder.AddContent(0, "Confirm action?"));
-if (reason == ToastCloseReason.Click)
-{
-    // user clicked the toast body
-}
-
-// 3) Await detailed result (includes timestamps and id)
-var result = await ToastService.ShowInfoDetailedAsync(builder => builder.AddContent(0, "Please confirm"));
-Console.WriteLine($"Toast {result.ToastId} closed with {result.Reason} after {result.Duration.TotalSeconds}s");
+var result = await ToastService.ShowToastDetailedAsync<MyToastComponent>(parameters, settings);
 ```
 
----
+The component rendered inside the toast receives a cascading `Toast` instance which can be used to close itself programmatically.
 
-## Brief public API (high level)
+## Clearing and queue management
 
-IToastService focuses on RenderFragment messages and component-based toasts. Key methods:
+- `ToastService.ClearAll()` — remove all visible toasts (awaiting callers receive Programmatic)
+- `ToastService.ClearToasts(ToastLevel.Warning)` — remove visible toasts by level
+- `ToastService.ClearCustomToasts()` — remove component toasts
+- `ToastService.ClearQueue()` and `ClearQueueToasts(...)` — remove queued toasts
 
-- Message-based (RenderFragment)
+## API summary
+
+Public surface (high level):
+
+- Message-based (RenderFragment):
   - `void ShowInfo(RenderFragment message, Action<ToastSettings>? settings = null)`
-  - `Task<ToastCloseReason> ShowInfoAsync(RenderFragment message, Action<ToastSettings>? settings = null)`
-  - `Task<ToastResult> ShowInfoDetailedAsync(RenderFragment message, Action<ToastSettings>? settings = null)`
+  - `Task<ToastCloseReason> ShowInfoAsync(...)` / `Task<ToastResult> ShowInfoDetailedAsync(...)`
+  - Same for `ShowSuccess`, `ShowWarning`, `ShowError`
 
-- Component-based
-  - `void ShowToast<TComponent>(ToastParameters? parameters = null, Action<ToastSettings>? settings = null) where TComponent : IComponent`
-  - `Task<ToastCloseReason> ShowToastAsync<TComponent>(ToastParameters? parameters = null, Action<ToastSettings>? settings = null) where TComponent : IComponent`
-  - `Task<ToastResult> ShowToastDetailedAsync<TComponent>(ToastParameters? parameters = null, Action<ToastSettings>? settings = null) where TComponent : IComponent`
+- Component-based:
+  - `void ShowToast<TComponent>(...)` / `Task<ToastCloseReason> ShowToastAsync<TComponent>(...)`
+  - `Task<ToastResult> ShowToastDetailedAsync<TComponent>(...)`
 
-- Clear / queue APIs
-  - `void ClearAll()`, `void ClearToasts(ToastLevel level)`, `void ClearCustomToasts()`, `void ClearQueue()`, `void ClearQueueToasts(ToastLevel level)`
+- Clear/queue APIs: `ClearAll`, `ClearToasts`, `ClearCustomToasts`, `ClearQueue`, `ClearQueueToasts`
 
-See sample pages in the `WebAppSample` project for many usage examples.
+Key types:
 
----
+- `ToastLevel` — Info, Success, Warning, Error
+- `ToastCloseReason` — Unknown, Timeout, CloseButton, Click, Programmatic
+- `ToastResult` — { ToastId (Guid), Reason, ShownAt, ClosedAt, Duration }
 
-## ToastCloseReason and ToastResult
+## Samples
 
-When you await `ShowXAsync(...)` you receive a `ToastCloseReason` (enum) indicating how the toast was closed:
+Open `WebAppSample` in this solution for working examples and usage pages:
 
-- `Unknown`, `Timeout`, `CloseButton`, `Click`, `Programmatic`
-
-When you await `ShowXDetailedAsync(...)` you receive a `ToastResult` with:
-
-- `ToastId` (Guid), `Reason` (ToastCloseReason), `ShownAt`, `ClosedAt`, and computed `Duration`.
-
-These let you react to user interactions or programmatic clears.
-
----
-
-## Component-based toasts and cascading Toast
-
-Render a Blazor component inside a toast and await the detailed `ToastResult`. The component receives a cascading `Toast` instance which it can use to close itself (`ParentToast.Close()`). See `WebAppSample` for examples.
-
----
-
-## Backward compatibility & migration notes
-
-- The public API was simplified to prefer `RenderFragment` messages. To avoid breaking callers that pass strings, extension helpers are included that wrap strings into `RenderFragment` automatically.
-- Internal event hooks previously exposed are now internal (`IToastServiceEvents`) and should not be consumed directly. The public API methods should be used instead.
-- If you relied on deprecated overloads that returned `ToastResult` via a `detailedResult` boolean, use the explicit `ShowXDetailedAsync` methods instead.
-
----
-
-## Examples and samples
-
-See the `WebAppSample` project for multiple example pages:
+- `ToastGeneraLegacyExample.razor` — legacy usage
 - `ToastGeneralExample.razor` — general usage
-- `ToastCloseReasonExample.razor` — demonstrates all close reasons and awaitable close
-- `ToastResultExample.razor` — demonstrates `ToastResult` detailed output
+- `ToastCloseReasonExample.razor` — demonstrates awaitable close reasons
+- `ToastResultExample.razor` — demonstrates detailed `ToastResult`
 
----
+## Contributing
+
+Contributions, bug reports and pull requests are welcome. Follow the coding conventions in the repo and keep changes minimal and focused.
+
+## License
+
+MIT. See `license.txt` in the repository for details.
 
 ## Origin
 
@@ -173,9 +190,3 @@ https://github.com/Blazored/Toast
 
 This is an independent modification to support .NET 10. All original credit remains with the upstream contributors under the MIT License.
 
----
-
-## License
-
-MIT License  
-See the `license.txt` file for details.
